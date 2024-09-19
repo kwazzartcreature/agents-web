@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  reverse-proxy:
+    image: traefik:v2.6
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./reverse-proxy/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - reverse-proxy
+      - local
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.entrypoints.web.address=:8080"
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
+    networks:
+      - local
+
+  postgres:
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - local
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - local
+    depends_on:
+      - postgres
+
+networks:
+  reverse-proxy:
+    external: true
+  local:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local

@@ -1,0 +1,20 @@
+package layouts
+
+templ AppLayout(page templ.Component) {
+	<div class="h-screen w-screen grid grid-cols-[100px_1fr] grid-rows-[100px_1fr] gap-1">
+		<header class="border row-span-1 col-start-2">
+			<p>I am Header</p>
+		</header>
+		<aside class="border row-start-1 row-end-3">
+			<nav>
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="/log-in">Log-In</a></li>
+				</ul>
+			</nav>
+		</aside>
+		<main class="border col-start-2 row-start-2 overflow-y-scroll">
+			@page
+		</main>
+	</div>
+}
